@@ -1,146 +1,157 @@
 # OpenAI API 代理服务器
 
-这是一个简单高效的 OpenAI API 代理服务器，可以部署在海外服务器上，帮助转发 OpenAI API 请求。使用 `http-proxy-middleware` 实现，确保流式响应的完美支持。
+简单高效的 OpenAI API 代理服务器，支持完整的流式响应，一键部署到任何环境。
 
-## 功能特性
+## ✨ 功能特性
 
-- ✅ 完整的 OpenAI API 代理转发
-- ✅ 支持所有 OpenAI API 端点 (`/v1/*`)
-- ✅ 完美支持流式响应 (stream=true)
-- ✅ 自动处理请求/响应头
-- ✅ 错误处理和日志记录
-- ✅ 健康检查端点
-- ✅ CORS 支持
-- ✅ 优雅关闭
+- 🚀 **完整代理**: 支持所有 OpenAI API 端点
+- 🌊 **流式响应**: 完美支持 `stream=true` 模式
+- 🐳 **容器化**: Docker 开箱即用
+- 🔧 **零配置**: 无需复杂设置
+- 📊 **健康检查**: 内置监控端点
+- 🌐 **CORS 支持**: 跨域请求友好
 
-## 快速开始
+## 🚀 快速开始
 
-### 1. 安装依赖
+### Docker 部署（推荐）
 
 ```bash
-npm install
-```
-
-### 2. 启动服务器
-
-```bash
-# 生产环境
-npm start
-
-# 开发环境（自动重启）
-npm run dev
-```
-
-### 3. 使用代理
-
-将你的 OpenAI API 请求中的 `https://api.openai.com` 替换为你的代理服务器地址即可。
-
-**原始请求：**
-```bash
-curl "https://api.openai.com/v1/chat/completions" \
-    -H "Content-Type: application/json" \
-    -H "Authorization: Bearer $OPENAI_API_KEY" \
-    -d '{
-        "model": "gpt-4",
-        "messages": [
-            {
-                "role": "user",
-                "content": "Hello!"
-            }
-        ]
-    }'
-```
-
-**使用代理后：**
-```bash
-curl "http://your-server:3000/v1/chat/completions" \
-    -H "Content-Type: application/json" \
-    -H "Authorization: Bearer $OPENAI_API_KEY" \
-    -d '{
-        "model": "gpt-4",
-        "messages": [
-            {
-                "role": "user",
-                "content": "Hello!"
-            }
-        ]
-    }'
-```
-
-## 部署
-
-### Docker 部署
-
-```bash
-# 构建镜像
+# 1. 构建镜像
 docker build -t openai-proxy .
 
-# 运行容器
-docker run -d -p 3000:3000 --name openai-proxy openai-proxy
+# 2. 运行容器
+docker run -d \
+  --name openai-proxy \
+  -p 3000:3000 \
+  -e OPENAI_API_KEY=your_api_key_here \
+  openai-proxy:latest
+
+# 3. 使用 docker-compose
+docker-compose up -d
 ```
 
-### PM2 部署
+### 本地开发
 
 ```bash
-# 安装 PM2
-npm install -g pm2
+# 1. 安装依赖
+npm install
 
-# 启动应用
-pm2 start server.js --name openai-proxy
+# 2. 启动服务
+npm start
+```
 
+## 🔧 使用方法
+
+将 OpenAI API 请求中的 `https://api.openai.com` 替换为你的代理服务器地址：
+
+```bash
+# 流式聊天示例
+curl -X POST http://localhost:3000/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $OPENAI_API_KEY" \
+  -d '{
+    "model": "gpt-4",
+    "messages": [{"role": "user", "content": "Hello!"}],
+    "stream": true
+  }' --no-buffer
+```
+
+## 🐳 Docker 使用
+
+### 基本运行
+
+```bash
+# 使用环境变量
+docker run -d \
+  --name openai-proxy \
+  -p 3000:3000 \
+  -e TARGET_URL=https://api.openai.com \
+  openai-proxy:latest
+
+# 使用 .env 文件
+docker run -d \
+  --name openai-proxy \
+  -p 3000:3000 \
+  --env-file .env \
+  openai-proxy:latest
+```
+
+### Docker Compose
+
+```yaml
+# docker-compose.yml
+version: '3.8'
+services:
+  openai-proxy:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - TARGET_URL=https://api.openai.com
+    restart: unless-stopped
+```
+
+### 容器管理
+
+```bash
 # 查看状态
-pm2 status
+docker ps
 
 # 查看日志
-pm2 logs openai-proxy
+docker logs openai-proxy -f
+
+# 重启容器
+docker restart openai-proxy
+
+# 停止并删除
+docker stop openai-proxy && docker rm openai-proxy
 ```
 
-### 直接部署
+## ⚙️ 配置选项
 
-```bash
-# 后台运行
-nohup node server.js > output.log 2>&1 &
-```
+| 环境变量 | 默认值 | 说明 |
+|---------|--------|------|
+| `PORT` | 3000 | 服务端口 |
+| `TARGET_URL` | https://api.openai.com | 目标 API 地址 |
+| `OPENAI_API_KEY` | - | OpenAI API 密钥（可选） |
 
-## 环境变量
+## 📡 API 端点
 
-创建 `.env` 文件来配置环境变量：
-
-```env
-# 服务器端口
-PORT=3000
-
-# 其他配置...
-```
-
-## API 端点
-
-- `GET /` - 服务器信息和使用说明
+- `GET /` - 服务信息
 - `GET /health` - 健康检查
 - `ALL /v1/*` - OpenAI API 代理
 
-## 安全建议
+## 🛠️ 故障排除
 
-1. **使用 HTTPS**: 在生产环境中使用反向代理（如 Nginx）来提供 HTTPS
-2. **防火墙**: 限制只允许必要的端口访问
-3. **认证**: 如需要，可以添加 API Key 认证
-4. **监控**: 设置服务器监控和日志收集
+### 测试健康状态
 
-## 故障排除
+```bash
+curl http://localhost:3000/health
+# 响应: {"status":"ok","timestamp":"...","message":"OpenAI Proxy Server is running"}
+```
 
 ### 常见问题
 
-1. **CORS 错误**: 服务器已启用 CORS，如果仍有问题，检查客户端设置
-2. **超时错误**: 检查网络连接，必要时增加超时时间
-3. **速率限制**: 如触发速率限制，等待或调整限制设置
+1. **连接失败**: 检查网络和防火墙设置
+2. **代理错误**: 确认 `TARGET_URL` 配置正确
+3. **权限问题**: 检查 `OPENAI_API_KEY` 是否有效
 
 ### 查看日志
 
-服务器会输出详细的请求日志，包括：
-- 请求时间和 IP
-- 代理的目标 URL
-- 错误信息
+```bash
+# Docker 容器日志
+docker logs openai-proxy
 
-## 许可证
+# 本地运行日志
+npm start  # 直接在终端查看
+```
+
+## 📦 镜像信息
+
+- **镜像大小**: ~139MB
+- **基础镜像**: node:18-alpine
+- **架构支持**: linux/amd64
+
+## 📄 许可证
 
 MIT License
