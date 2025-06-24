@@ -1,12 +1,13 @@
 # OpenAI API 代理服务器
 
-这是一个简单的 OpenAI API 代理服务器，可以部署在海外服务器上，帮助转发 OpenAI API 请求。
+这是一个简单高效的 OpenAI API 代理服务器，可以部署在海外服务器上，帮助转发 OpenAI API 请求。使用 `http-proxy-middleware` 实现，确保流式响应的完美支持。
 
 ## 功能特性
 
 - ✅ 完整的 OpenAI API 代理转发
 - ✅ 支持所有 OpenAI API 端点 (`/v1/*`)
-- ✅ 请求速率限制保护
+- ✅ 完美支持流式响应 (stream=true)
+- ✅ 自动处理请求/响应头
 - ✅ 错误处理和日志记录
 - ✅ 健康检查端点
 - ✅ CORS 支持
@@ -117,30 +118,6 @@ PORT=3000
 - `GET /` - 服务器信息和使用说明
 - `GET /health` - 健康检查
 - `ALL /v1/*` - OpenAI API 代理
-
-## 配置选项
-
-### 速率限制
-
-默认配置：每个 IP 每 15 分钟最多 100 个请求。可以在 `server.js` 中修改：
-
-```javascript
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 时间窗口
-  max: 100, // 最大请求数
-});
-```
-
-### 超时设置
-
-默认请求超时时间为 2 分钟，可以在 `server.js` 中修改：
-
-```javascript
-const config = {
-  // ...
-  timeout: 120000, // 毫秒
-};
-```
 
 ## 安全建议
 
