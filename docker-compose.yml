@@ -2,11 +2,15 @@ version: '3.8'
 
 services:
   openai-proxy:
-    build: .
+    image: docker.io/jamescui6677/openai-proxy:latest
+    # 如果需要自行构建，可以注释上面一行，取消注释下面一行
+    # build: .
     ports:
       - "3000:3000"
     environment:
       - PORT=3000
+      # - OPENAI_API_KEY=your_api_key_here  # 可选：设置默认API密钥
+      # - TARGET_URL=https://api.openai.com  # 可选：自定义目标URL
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/health"]

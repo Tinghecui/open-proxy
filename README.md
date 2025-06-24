@@ -2,6 +2,8 @@
 
 简单高效的 OpenAI API 代理服务器，支持完整的流式响应，一键部署到任何环境。
 
+> 🎉 **一键部署**: `docker run -d -p 3000:3000 docker.io/jamescui6677/openai-proxy:latest`
+
 ## ✨ 功能特性
 
 - 🚀 **完整代理**: 支持所有 OpenAI API 端点
@@ -16,10 +18,15 @@
 ### Docker 部署（推荐）
 
 ```bash
-# 1. 构建镜像
-docker build -t openai-proxy .
+# 1. 直接使用预构建镜像（推荐）
+docker run -d \
+  --name openai-proxy \
+  -p 3000:3000 \
+  -e OPENAI_API_KEY=your_api_key_here \
+  docker.io/jamescui6677/openai-proxy:latest
 
-# 2. 运行容器
+# 2. 或自行构建镜像
+docker build -t openai-proxy .
 docker run -d \
   --name openai-proxy \
   -p 3000:3000 \
@@ -61,19 +68,19 @@ curl -X POST http://localhost:3000/v1/chat/completions \
 ### 基本运行
 
 ```bash
-# 使用环境变量
+# 使用预构建镜像（推荐）
 docker run -d \
   --name openai-proxy \
   -p 3000:3000 \
   -e TARGET_URL=https://api.openai.com \
-  openai-proxy:latest
+  docker.io/jamescui6677/openai-proxy:latest
 
 # 使用 .env 文件
 docker run -d \
   --name openai-proxy \
   -p 3000:3000 \
   --env-file .env \
-  openai-proxy:latest
+  docker.io/jamescui6677/openai-proxy:latest
 ```
 
 ### Docker Compose
@@ -83,12 +90,18 @@ docker run -d \
 version: '3.8'
 services:
   openai-proxy:
-    build: .
+    image: docker.io/jamescui6677/openai-proxy:latest
     ports:
       - "3000:3000"
     environment:
       - TARGET_URL=https://api.openai.com
+      - OPENAI_API_KEY=your_api_key_here  # 可选
     restart: unless-stopped
+```
+
+启动命令：
+```bash
+docker-compose up -d
 ```
 
 ### 容器管理
@@ -148,9 +161,20 @@ npm start  # 直接在终端查看
 
 ## 📦 镜像信息
 
+- **Docker Hub**: `docker.io/jamescui6677/openai-proxy:latest`
 - **镜像大小**: ~139MB
 - **基础镜像**: node:18-alpine
 - **架构支持**: linux/amd64
+
+### 快速拉取
+
+```bash
+# 拉取最新镜像
+docker pull docker.io/jamescui6677/openai-proxy:latest
+
+# 立即运行
+docker run -d -p 3000:3000 docker.io/jamescui6677/openai-proxy:latest
+```
 
 ## 📄 许可证
 
